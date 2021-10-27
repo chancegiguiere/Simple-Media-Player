@@ -41,7 +41,7 @@ class VideoWindow(QMainWindow):
         #Create Fullscreen Button
         self.fullScreenButton = QPushButton()
         #self.fullScreenButton.setEnabled(False)
-        self.fullScreenButton.setIcon(QIcon('fullscreen.png'))
+        self.fullScreenButton.setIcon(QIcon('./Media Player/fullscreen.png'))
         self.fullScreenButton.clicked.connect(self.toggleFullScreen)
         self.fullScreenButton.setToolTip("Toggle fullscreen mode. Also try F and F11.")
 
@@ -70,9 +70,9 @@ class VideoWindow(QMainWindow):
         openAction.triggered.connect(self.openFile)
 
         #Create open folder action (for queueing a playlist)
-        openAction = QAction('&Open Folder', self)        
-        openAction.setShortcut('Ctrl+D') # D is for Directory
-        openAction.setStatusTip('Open a folder containing many media files.')
+        #openAction = QAction('&Open Folder', self)        
+        #openAction.setShortcut('Ctrl+D') # D is for Directory
+        #openAction.setStatusTip('Open a folder containing many media files.')
        #openAction.triggered.connect(self.openFile) #Need to create "Open folder" function that will add all files in a directory to play queue.
 
        
@@ -110,10 +110,6 @@ class VideoWindow(QMainWindow):
         layout.addLayout(controlLayout)
         layout.addWidget(self.errorLabel)
 
-        
-        
-        
-        
         # Set widget to contain window contents
         wid.setLayout(layout)
 
