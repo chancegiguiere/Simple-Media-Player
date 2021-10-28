@@ -17,7 +17,7 @@ class VideoWindow(QMainWindow):
     def __init__(self, parent=None):
         super(VideoWindow, self).__init__(parent)
         
-        self.setWindowIcon(QtGui.QIcon('Wojak_cropped.jpg'))
+        self.setWindowIcon(QtGui.QIcon('./Media Player/Wojak_cropped.jpg'))
         self.setWindowTitle("SImple Media Player (SIMP)") 
 
         #create media player object
@@ -82,11 +82,20 @@ class VideoWindow(QMainWindow):
         exitAction.setStatusTip('Exit application')
         exitAction.triggered.connect(self.exitCall)
 
-        # Create menu bar and add action
+        # Create menu bar and add file open/ exit actions
         menuBar = self.menuBar()
         fileMenu = menuBar.addMenu('&File')
         fileMenu.addAction(openAction)
         fileMenu.addAction(exitAction)
+
+        lyrMenu = menuBar.addMenu("&Lyrics")
+
+        visMenu = menuBar.addMenu("&Visualizer")
+
+
+
+
+
 
         # Create a widget for window contents
         wid = QWidget(self)
@@ -133,6 +142,9 @@ class VideoWindow(QMainWindow):
        
         filePath, _ = QFileDialog.getOpenFileName(self, "Open Media File",
                 QDir.homePath())
+        
+        #filePath.setFilter("Music Files (*.mp3, *.flac, *.aac, *.m4a, *.wav)")
+        #filePath.setFilter("Video Files (*.mp4, *.mov, >")
 
         if filePath != '':
             self.mediaPlayer.setMedia(
