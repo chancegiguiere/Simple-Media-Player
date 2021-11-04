@@ -10,6 +10,8 @@ from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,QPushButton, QShortcut, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget)
 from PyQt5.QtWidgets import QMainWindow,QWidget, QPushButton, QAction
 from PyQt5.QtGui import QIcon, QKeySequence, QPixmap
+from lyricsService import *
+from tinytag import TinyTag as tt
 import sys
 
 class VideoWindow(QMainWindow):
@@ -75,6 +77,11 @@ class VideoWindow(QMainWindow):
         #openAction.setStatusTip('Open a folder containing many media files.')
        #openAction.triggered.connect(self.openFile) #Need to create "Open folder" function that will add all files in a directory to play queue.
 
+        #create lyrics finder action (For Ken's microservice)
+        lyrAction = QAction("&Find Lyrics", self)
+        lyrAction.setStatusTip("Find Lyrics for a song")
+        lyrAction.triggered.connect(self.findLyrics)
+
        
         # Create exit program action
         exitAction = QAction('&Exit', self)        
@@ -89,6 +96,7 @@ class VideoWindow(QMainWindow):
         fileMenu.addAction(exitAction)
 
         lyrMenu = menuBar.addMenu("&Lyrics")
+        lyrMenu.addAction(lyrAction)
 
         visMenu = menuBar.addMenu("&Visualizer")
 
@@ -138,8 +146,9 @@ class VideoWindow(QMainWindow):
             self.showFullScreen()
 
     def openFile(self):
-        audioFileTypes = ('.mp3', '.flac', '.aac', '.m4a', '.wav')
-       
+        
+        global filePath
+        global filename
         filePath, _ = QFileDialog.getOpenFileName(self, "Open Media File",
                 QDir.homePath())
         
@@ -147,19 +156,35 @@ class VideoWindow(QMainWindow):
         #filePath.setFilter("Video Files (*.mp4, *.mov, >")
 
         if filePath != '':
+            print(filePath)
             self.mediaPlayer.setMedia(
                     QMediaContent(QUrl.fromLocalFile(filePath)))
             filename = QFileInfo(filePath).fileName()
             
+
             
             #Check file extension. Want to show generic "music-y" image when playing audio file.
-            if filename.lower().endswith(audioFileTypes):
-                print("File is an audio file.")
+            #if filename.lower().endswith(audioFileTypes):
+             #   print("File is an audio file.")
 
             self.enableButtons()
             self.setWindowTitle("SIMP: Now Playing " + filename)
             self.play()
     
+    def findLyrics(self):
+        audioFileTypes = ('.mp3', '.flac', '.aac', '.m4a', '.wav')
+        
+        if filename.endswith(audioFileTypes):
+            song = tt.get(filePath)
+            songTitle = song.title
+            print("song title is: " + songTitle)
+            songArtist = song.artist
+            print("song artist is: " + songArtist)
+            
+            print("\n SONG LYRICS: \n \n")
+            lyrics = get_lyrics(songTitle, songArtist)
+            print (lyrics)
+
 
     def enableButtons(self):
         self.playButton.setEnabled(True)
