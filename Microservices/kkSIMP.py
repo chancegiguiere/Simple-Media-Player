@@ -2,7 +2,6 @@
 #Link: https://www.codecguide.com/download_k-lite_codec_pack_standard.htm
 
 
-#from _typeshed import Self
 from PyQt5 import QtGui
 from PyQt5 import QtCore
 from PyQt5.QtCore import QDir, QFileInfo, Qt, QUrl
@@ -15,18 +14,18 @@ from lyricsService import *
 from tinytag import TinyTag as tt
 import sys
 
-class VideoWindow(QMainWindow):
+class MediaWindow(QMainWindow):
 
     def __init__(self, parent=None):
-        super(VideoWindow, self).__init__(parent)
+        super(MediaWindow, self).__init__(parent)
         
-        self.setWindowIcon(QtGui.QIcon('./Media Player/Wojak_cropped.jpg'))
-        self.setWindowTitle("SImple Media Player (SIMP)") 
+        #self.setWindowIcon(QtGui.QIcon('./Media Player/Wojak_cropped.jpg'))
+        self.setWindowTitle("SIMP (Headless)") 
 
         #create media player object
         self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
 
-        videoWidget = QVideoWidget()
+        #videoWidget = QVideoWidget()
 
         #Create Play button
         self.playButton = QPushButton()
@@ -39,22 +38,6 @@ class VideoWindow(QMainWindow):
         #Use Space to play/pause media
         self.playbackToggle = QShortcut(QKeySequence(' '), self)
         self.playbackToggle.activated.connect(self.play)
-
-
-        #Create Fullscreen Button
-        self.fullScreenButton = QPushButton()
-        #self.fullScreenButton.setEnabled(False)
-        self.fullScreenButton.setIcon(QIcon('./Media Player/fullscreen.png'))
-        self.fullScreenButton.clicked.connect(self.toggleFullScreen)
-        self.fullScreenButton.setToolTip("Toggle fullscreen mode. Also try F and F11.")
-
-        #Use 'F' to toggle fullscreen on or off. Source: https://zetcode.com/pyqt/qshortcut/
-        self.fullScreenShortcut = QShortcut(QKeySequence('F'), self)
-        self.fullScreenShortcut.activated.connect(self.toggleFullScreen)
-
-        #Use 'F11' as well.
-        self.fullScreenShortcut2 = QShortcut(QKeySequence('F11'), self) 
-        self.fullScreenShortcut2.activated.connect(self.toggleFullScreen)
 
         #create media slider bar
         self.positionSlider = QSlider(Qt.Horizontal)
@@ -93,18 +76,7 @@ class VideoWindow(QMainWindow):
         # Create menu bar and add file open/ exit actions
         menuBar = self.menuBar()
         fileMenu = menuBar.addMenu('&File')
-        fileMenu.addAction(openAction)
         fileMenu.addAction(exitAction)
-
-        lyrMenu = menuBar.addMenu("&Lyrics")
-        lyrMenu.addAction(lyrAction) #add lyrics action to appropriate menu
-
-        visMenu = menuBar.addMenu("&Visualizer")
-
-
-
-
-
 
         # Create a widget for window contents
         wid = QWidget(self)
@@ -115,7 +87,6 @@ class VideoWindow(QMainWindow):
         controlLayout.setContentsMargins(0, 0, 0, 0)
         controlLayout.addWidget(self.playButton)
         controlLayout.addWidget(self.positionSlider)
-        controlLayout.addWidget(self.fullScreenButton)
         
         #Add Text to main window
         #self.label = QLabel("No Media Loaded.\n Use the dropdown menu above or press Ctrl + O to open a file.")
@@ -124,27 +95,19 @@ class VideoWindow(QMainWindow):
         #create program layout
         layout = QVBoxLayout()
        # layout.addWidget(self.label)
-        layout.addWidget(videoWidget)
+       # layout.addWidget(videoWidget)
         layout.addLayout(controlLayout)
         layout.addWidget(self.errorLabel)
 
         # Set widget to contain window contents
         wid.setLayout(layout)
 
-        self.mediaPlayer.setVideoOutput(videoWidget)
+       # self.mediaPlayer.setVideoOutput(videoWidget)
         self.mediaPlayer.stateChanged.connect(self.mediaStateChanged)
         self.mediaPlayer.positionChanged.connect(self.positionChanged)
         self.mediaPlayer.durationChanged.connect(self.durationChanged)
         self.mediaPlayer.error.connect(self.handleError)
 
-
-
-
-    def toggleFullScreen(self):
-        if self.windowState() & QtCore.Qt.WindowFullScreen:
-            self.showNormal()
-        else:
-            self.showFullScreen()
 
     def openFile(self):
         
@@ -166,11 +129,11 @@ class VideoWindow(QMainWindow):
              #   print("File is an audio file.")
 
             self.enableButtons()
-            self.setWindowTitle("SIMP: Now Playing " + filename)
+            #self.setWindowTitle("SIMP: Now Playing " + filename)
             self.play()
     
    
-   
+ 
     #Find Lyrics: 
     #This function will check 
    
@@ -192,11 +155,10 @@ class VideoWindow(QMainWindow):
         
         else:
             print("The file " + filename + " is not supported by lyrics search. \n Supported file types are mp3, flac, aac, m4a, and wav.")
-
-
+                                                                                           
     def enableButtons(self):
         self.playButton.setEnabled(True)
-        self.fullScreenButton.setEnabled(True)
+        #self.fullScreenButton.setEnabled(True)
 
     def exitCall(self):
         sys.exit(app.exec_())
@@ -230,8 +192,9 @@ class VideoWindow(QMainWindow):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    player = VideoWindow()
-    player.resize(640, 480)
+    player = MediaWindow()
+    player.resize(350,150)
     player.show()
+    player.openFile()
+    player.findLyrics()
     sys.exit(app.exec_())
-    
