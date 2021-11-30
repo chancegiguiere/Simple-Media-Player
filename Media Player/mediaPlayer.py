@@ -2,7 +2,6 @@
 #Link: https://www.codecguide.com/download_k-lite_codec_pack_standard.htm
 
 
-#from _typeshed import Self
 from PyQt5 import QtGui
 from PyQt5 import QtCore
 from PyQt5.QtCore import QDir, QFileInfo, Qt, QUrl

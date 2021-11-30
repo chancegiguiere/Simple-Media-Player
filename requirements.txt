@@ -1,0 +1,7 @@
+librosa==0.8.1
+lyricsgenius==3.0.1
+matplotlib==3.4.3
+numpy==1.20.3
+pygame==2.1.0
+PyQt5==5.15.6
+tinytag==1.6.0
