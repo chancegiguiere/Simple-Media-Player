@@ -14,12 +14,13 @@ from PyQt5.QtGui import QIcon, QKeySequence, QPixmap
 from lyricsService import *
 from tinytag import TinyTag as tt
 import sys
+import Visualizer.visualizer as visualizer
 
 class VideoWindow(QMainWindow):
 
     def __init__(self, parent=None):
         super(VideoWindow, self).__init__(parent)
-        
+        self.visual = visualizer.AduioVisualizer()
         self.setWindowIcon(QtGui.QIcon('./Media Player/Wojak_cropped.jpg'))
         self.setWindowTitle("SImple Media Player (SIMP)") 
 
@@ -65,7 +66,9 @@ class VideoWindow(QMainWindow):
         self.errorLabel.setSizePolicy(QSizePolicy.Preferred,
                 QSizePolicy.Maximum)
 
-       
+    
+
+
         # Create open file action
         openAction = QAction('&Open File', self)        
         openAction.setShortcut('Ctrl+O')
@@ -83,7 +86,13 @@ class VideoWindow(QMainWindow):
         lyrAction.setStatusTip("Find Lyrics for a song")
         lyrAction.triggered.connect(self.findLyrics)
 
-       
+        #create visualizer action (for Dominic's service. ONLY WAV FILES WORK)
+        visAction = QAction("&Visualize Audio", self)
+        visAction.setStatusTip("Display music Visualizer. Only works with .wav files.")
+        lyrAction.triggered.connect(self.visualize)
+
+        
+
         # Create exit program action
         exitAction = QAction('&Exit', self)        
         exitAction.setShortcut('Ctrl+Q')
@@ -100,6 +109,7 @@ class VideoWindow(QMainWindow):
         lyrMenu.addAction(lyrAction) #add lyrics action to appropriate menu
 
         visMenu = menuBar.addMenu("&Visualizer")
+        visMenu.addAction(visAction)
 
 
 
@@ -138,6 +148,9 @@ class VideoWindow(QMainWindow):
         self.mediaPlayer.error.connect(self.handleError)
 
 
+    def visualize(self):
+        
+        self.play(self.visual.click(filePath))
 
 
     def toggleFullScreen(self):
@@ -204,8 +217,12 @@ class VideoWindow(QMainWindow):
     def play(self):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
             self.mediaPlayer.pause()
+            #if self.visual == True:
+            self.visual.set_False()
         else:
             self.mediaPlayer.play()
+            #if self.visual == True:
+            self.visual.set_True()
 
     def mediaStateChanged(self, state):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
