@@ -20,7 +20,7 @@ class VideoWindow(QMainWindow):
     def __init__(self, parent=None):
         super(VideoWindow, self).__init__(parent)
         self.setWindowIcon(QtGui.QIcon('./Media Player/Wojak_cropped.jpg'))
-        self.setWindowTitle("SImple Media Player with Lyrics (SIMP-L)") 
+        self.setWindowTitle("Simple Media Player with Lyrics (SIMP-L)") 
 
         #create media player object
         self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
@@ -72,11 +72,6 @@ class VideoWindow(QMainWindow):
         lyrAction.setStatusTip("Find Lyrics for a song")
         lyrAction.triggered.connect(self.findLyrics)
 
-        """#create visualizer action (for Dominic's service. ONLY WAV FILES WORK)
-        visAction = QAction("&Visualize Audio", self)
-        visAction.setStatusTip("Display music Visualizer. Only works with .wav files.")
-        #lyrAction.triggered.connect(self.visualize)"""
-
         # Create exit program action
         exitAction = QAction('&Exit', self)        
         exitAction.setShortcut('Ctrl+Q')
@@ -94,7 +89,6 @@ class VideoWindow(QMainWindow):
 
         visMenu = menuBar.addMenu("&Visualizer")
         
-
         # Create a widget for window contents
         wid = QWidget(self)
         self.setCentralWidget(wid)
@@ -139,7 +133,7 @@ class VideoWindow(QMainWindow):
             filename = QFileInfo(filePath).fileName()
             
             self.enableButtons()
-            self.setWindowTitle("SIMP: Now Playing " + filename)
+            self.setWindowTitle("SIMP-L - Now Playing: " + filename)
             self.play()
     
    
@@ -169,11 +163,10 @@ class VideoWindow(QMainWindow):
                 os.startfile("lyrics.txt")
                 return
 
-            print("\n SONG LYRICS: \n \n")
             lyrics = get_lyrics(songTitle, songArtist)
 
             #print lyrics to text file (overwrite if already exists)           
-            lyr = text_file.write(lyrics)
+            lyr = text_file.write("SONG LYRICS: " + songTitle +" by " + songArtist +"\n \n" + lyrics)
             text_file.close()
             os.startfile("lyrics.txt") #open .txt file in default editor
    
@@ -223,4 +216,3 @@ if __name__ == '__main__':
     player.resize(640, 480)
     player.show()
     sys.exit(app.exec_())
-    
