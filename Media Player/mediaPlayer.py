@@ -13,24 +13,21 @@ from PyQt5.QtGui import QIcon, QKeySequence, QPixmap
 from lyricsService import *
 from tinytag import TinyTag as tt
 import sys
-import Visualizer.visualizer as visualizer
+import os
 
 class VideoWindow(QMainWindow):
 
     def __init__(self, parent=None):
         super(VideoWindow, self).__init__(parent)
-        self.visual = visualizer.AduioVisualizer()
         self.setWindowIcon(QtGui.QIcon('./Media Player/Wojak_cropped.jpg'))
-        self.setWindowTitle("SImple Media Player (SIMP)") 
+        self.setWindowTitle("SImple Media Player with Lyrics (SIMP-L)") 
 
         #create media player object
         self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
-
         videoWidget = QVideoWidget()
 
         #Create Play button
         self.playButton = QPushButton()
-        #self.playButton.setEnabled(False)
         self.playButton.setToolTip("Play/Pause Media. Press spacebar to toggle as well.")
         self.playButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
         self.playButton.clicked.connect(self.play) #trigger play/pause toggle when clicked
@@ -52,7 +49,7 @@ class VideoWindow(QMainWindow):
         self.fullScreenShortcut = QShortcut(QKeySequence('F'), self)
         self.fullScreenShortcut.activated.connect(self.toggleFullScreen)
 
-        #Use 'F11' as well.
+        #Use 'F11' for fullscreen as well.
         self.fullScreenShortcut2 = QShortcut(QKeySequence('F11'), self) 
         self.fullScreenShortcut2.activated.connect(self.toggleFullScreen)
 
@@ -62,11 +59,7 @@ class VideoWindow(QMainWindow):
         self.positionSlider.sliderMoved.connect(self.setPosition)
 
         self.errorLabel = QLabel()
-        self.errorLabel.setSizePolicy(QSizePolicy.Preferred,
-                QSizePolicy.Maximum)
-
-    
-
+        self.errorLabel.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
 
         # Create open file action
         openAction = QAction('&Open File', self)        
@@ -74,23 +67,15 @@ class VideoWindow(QMainWindow):
         openAction.setStatusTip('Open a media file')
         openAction.triggered.connect(self.openFile)
 
-        #Create open folder action (for queueing a playlist)
-        #openAction = QAction('&Open Folder', self)        
-        #openAction.setShortcut('Ctrl+D') # D is for Directory
-        #openAction.setStatusTip('Open a folder containing many media files.')
-       #openAction.triggered.connect(self.openFile) #Need to create "Open folder" function that will add all files in a directory to play queue.
-
         #create lyrics finder action (For Ken's microservice)
         lyrAction = QAction("&Find Lyrics", self)
         lyrAction.setStatusTip("Find Lyrics for a song")
         lyrAction.triggered.connect(self.findLyrics)
 
-        #create visualizer action (for Dominic's service. ONLY WAV FILES WORK)
+        """#create visualizer action (for Dominic's service. ONLY WAV FILES WORK)
         visAction = QAction("&Visualize Audio", self)
         visAction.setStatusTip("Display music Visualizer. Only works with .wav files.")
-        lyrAction.triggered.connect(self.visualize)
-
-        
+        #lyrAction.triggered.connect(self.visualize)"""
 
         # Create exit program action
         exitAction = QAction('&Exit', self)        
@@ -108,12 +93,7 @@ class VideoWindow(QMainWindow):
         lyrMenu.addAction(lyrAction) #add lyrics action to appropriate menu
 
         visMenu = menuBar.addMenu("&Visualizer")
-        visMenu.addAction(visAction)
-
-
-
-
-
+        
 
         # Create a widget for window contents
         wid = QWidget(self)
@@ -126,31 +106,19 @@ class VideoWindow(QMainWindow):
         controlLayout.addWidget(self.positionSlider)
         controlLayout.addWidget(self.fullScreenButton)
         
-        #Add Text to main window
-        #self.label = QLabel("No Media Loaded.\n Use the dropdown menu above or press Ctrl + O to open a file.")
-
-
         #create program layout
         layout = QVBoxLayout()
-       # layout.addWidget(self.label)
         layout.addWidget(videoWidget)
         layout.addLayout(controlLayout)
         layout.addWidget(self.errorLabel)
 
         # Set widget to contain window contents
         wid.setLayout(layout)
-
         self.mediaPlayer.setVideoOutput(videoWidget)
         self.mediaPlayer.stateChanged.connect(self.mediaStateChanged)
         self.mediaPlayer.positionChanged.connect(self.positionChanged)
         self.mediaPlayer.durationChanged.connect(self.durationChanged)
         self.mediaPlayer.error.connect(self.handleError)
-
-
-    def visualize(self):
-        
-        self.play(self.visual.click(filePath))
-
 
     def toggleFullScreen(self):
         if self.windowState() & QtCore.Qt.WindowFullScreen:
@@ -159,7 +127,6 @@ class VideoWindow(QMainWindow):
             self.showFullScreen()
 
     def openFile(self):
-        
         global filePath
         global filename
         filePath, _ = QFileDialog.getOpenFileName(self, "Open Media File",
@@ -171,12 +138,6 @@ class VideoWindow(QMainWindow):
                     QMediaContent(QUrl.fromLocalFile(filePath)))
             filename = QFileInfo(filePath).fileName()
             
-
-            
-            #Check file extension. Want to show generic "music-y" image when playing audio file.
-            #if filename.lower().endswith(audioFileTypes):
-             #   print("File is an audio file.")
-
             self.enableButtons()
             self.setWindowTitle("SIMP: Now Playing " + filename)
             self.play()
@@ -184,26 +145,42 @@ class VideoWindow(QMainWindow):
    
    
     #Find Lyrics: 
-    #This function will check 
-   
-   
+    #This function will check for lyrics matching a given audio file using the Genius API
+    #The audio file needs to have title and artist metadata embedded in the file to work properly.
     def findLyrics(self):
-
-        audioFileTypes = ('.mp3', '.flac', '.aac', '.m4a', '.wav')
+        text_file = open("lyrics.txt", "wt")
+        audioFileTypes = ('.mp3', '.flac', '.aac', '.m4a', '.wav', '.wma')
         
         if filename.endswith(audioFileTypes):
             song = tt.get(filePath)
-            songTitle = song.title
-            print("song title is: " + songTitle)
-            songArtist = song.artist
-            print("song artist is: " + songArtist)
-            
+            if(song.title):
+                songTitle = song.title
+                print("song title is: " + songTitle)
+            else:
+                err = text_file.write("Error searching for lyrics. Make sure that title and artist metadata is present and correct")
+                os.startfile("lyrics.txt")
+                return
+
+            if(song.artist):
+                songArtist = song.artist
+                print("song artist is: " + songArtist)
+            else:
+                err = text_file.write("Error searching for lyrics. Make sure that title and artist metadata is present and correct")
+                os.startfile("lyrics.txt")
+                return
+
             print("\n SONG LYRICS: \n \n")
             lyrics = get_lyrics(songTitle, songArtist)
-            print (lyrics)
-        
+
+            #print lyrics to text file (overwrite if already exists)           
+            lyr = text_file.write(lyrics)
+            text_file.close()
+            os.startfile("lyrics.txt") #open .txt file in default editor
+   
         else:
-            print("The file " + filename + " is not supported by lyrics search. \n Supported file types are mp3, flac, aac, m4a, and wav.")
+            err = text_file.write("The file \" " + filename + "\" is not supported by lyrics search. \nSupported file types are mp3, flac, aac, m4a, wma, and wav.")
+            os.startfile("lyrics.txt")
+            return
 
 
     def enableButtons(self):
@@ -216,12 +193,8 @@ class VideoWindow(QMainWindow):
     def play(self):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
             self.mediaPlayer.pause()
-            #if self.visual == True:
-            self.visual.set_False()
         else:
             self.mediaPlayer.play()
-            #if self.visual == True:
-            self.visual.set_True()
 
     def mediaStateChanged(self, state):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
