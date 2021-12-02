@@ -1,4 +1,4 @@
-# SImple Media Player (SIMP)
+# SImple Media Player with Lyrics (SIMP-L)
 This is a simple media player application written in python and taking advantage of the PyQt5 library.
 
 # Pre-Requisites For Use:
